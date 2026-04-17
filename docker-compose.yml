@@ -1,0 +1,65 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clientsbiopharma_app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+    networks:
+      - clientsbiopharma
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: clientsbiopharma_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - clientsbiopharma
+
+  mysql:
+    image: mysql:8.0
+    container_name: clientsbiopharma_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: clientsbiopharma
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+      MYSQL_USER: app
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - clientsbiopharma
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: clientsbiopharma_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+    networks:
+      - clientsbiopharma
+
+volumes:
+  db_data:
+
+networks:
+  clientsbiopharma:
+    driver: bridge

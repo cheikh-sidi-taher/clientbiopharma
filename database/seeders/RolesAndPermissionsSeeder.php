@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissionNames = [
             'view zones',
@@ -27,8 +28,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'view visits',
             'view clients',
             'manage clients',
+            'export clients',
             'view reports',
             'export reports',
+            'view users',
+            'manage users',
         ];
 
         foreach ($permissionNames as $name) {
@@ -43,7 +47,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $admin->syncPermissions($all);
 
         $superviseur = Role::firstOrCreate(['name' => 'Superviseur', 'guard_name' => self::GUARD]);
-        $superviseur->syncPermissions($all);
+        $superviseur->syncPermissions(
+            $all->reject(fn ($p) => $p->name === 'manage users')->values()
+        );
 
         $agent = Role::firstOrCreate(['name' => 'Agent terrain', 'guard_name' => self::GUARD]);
         $agent->syncPermissions([
@@ -60,6 +66,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view pharmacies',
             'view clients',
             'manage clients',
+            'export clients',
             'view reports',
             'export reports',
             'export pharmacies',

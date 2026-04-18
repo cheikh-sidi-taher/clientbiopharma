@@ -10,6 +10,12 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['biopharma.allow_registration' => true]);
+    }
+
     public function test_registration_screen_can_be_rendered(): void
     {
         $response = $this->get('/register');

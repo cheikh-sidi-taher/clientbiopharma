@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pharmacy;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PharmacyExportController extends Controller
 {
@@ -34,9 +34,15 @@ class PharmacyExportController extends Controller
         $pharmacies = $query->get();
 
         $labelParts = ['Export Pharmacies'];
-        if ($request->filled('zone_id')) $labelParts[] = 'Zone #' . $request->get('zone_id');
-        if ($request->filled('interest_status')) $labelParts[] = 'Statut ' . $request->get('interest_status');
-        if ($request->filled('search')) $labelParts[] = 'Recherche "' . $request->get('search') . '"';
+        if ($request->filled('zone_id')) {
+            $labelParts[] = 'Zone #'.$request->get('zone_id');
+        }
+        if ($request->filled('interest_status')) {
+            $labelParts[] = 'Statut '.$request->get('interest_status');
+        }
+        if ($request->filled('search')) {
+            $labelParts[] = 'Recherche "'.$request->get('search').'"';
+        }
         $label = implode(' — ', $labelParts);
 
         $filename = $this->makeFilename($format);
@@ -106,7 +112,7 @@ class PharmacyExportController extends Controller
 
         return response($html, 200, [
             'Content-Type' => 'application/vnd.ms-excel; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -122,10 +128,9 @@ class PharmacyExportController extends Controller
 
     private function makeFilename(string $format): string
     {
-        $base = 'pharmacies_' . now()->format('Y-m-d_His');
+        $base = 'pharmacies_'.now()->format('Y-m-d_His');
         $ext = $format === 'excel' ? 'xls' : $format;
 
-        return $base . '.' . $ext;
+        return $base.'.'.$ext;
     }
 }
-

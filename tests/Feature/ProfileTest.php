@@ -14,11 +14,9 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->get('/profile');
+        $this->actingAs($user)->get('/profile')->assertRedirect('/parametres');
 
-        $response->assertOk();
+        $this->actingAs($user)->get('/parametres')->assertOk();
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -34,7 +32,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/parametres');
 
         $user->refresh();
 
@@ -56,7 +54,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/parametres');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -85,14 +83,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
+            ->from('/parametres')
             ->delete('/profile', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/parametres');
 
         $this->assertNotNull($user->fresh());
     }

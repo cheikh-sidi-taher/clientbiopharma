@@ -28,10 +28,27 @@
                     </div>
                 </div>
 
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    @if($client->status === 'actif')
+                        <span style="padding:6px 12px;background:#ecfdf5;color:#047857;border-radius:20px;font-size:12px;font-weight:700;">Actif</span>
+                    @else
+                        <span style="padding:6px 12px;background:#fef2f2;color:#b91c1c;border-radius:20px;font-size:12px;font-weight:700;">Inactif</span>
+                    @endif
                     <a href="{{ route('pharmacies.show', $client->pharmacy) }}" class="btn btn-outline">
                         <i class="bi bi-hospital-fill"></i> Voir la pharmacie
                     </a>
+                    @can('manage clients')
+                        <a href="{{ route('clients.edit', $client) }}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce client ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline" style="border-color:#fecaca;color:#dc2626;">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    @endcan
                 </div>
             </div>
 

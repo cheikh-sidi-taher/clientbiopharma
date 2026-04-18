@@ -1,25 +1,46 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+@extends('layouts.auth-biopharma')
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@section('title', 'Mot de passe oublié — Biopharma CRM')
+
+@section('auth_heading', 'Réinitialiser le mot de passe')
+@section('auth_lead', 'Indiquez votre adresse e-mail : nous vous enverrons un lien pour choisir un nouveau mot de passe.')
+
+@section('content')
+    <a class="auth-back" href="{{ route('login') }}">
+        <i class="bi bi-arrow-left"></i> Retour à la connexion
+    </a>
+
+    <h2 class="form-title">Mot de passe oublié</h2>
+    <p class="form-subtitle">Saisissez l’e-mail associé à votre compte. Vous recevrez un lien de réinitialisation si un compte existe.</p>
+
+    @if (session('status'))
+        <div class="success-message">
+            <i class="bi bi-check-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+            <span>{{ session('status') }}</span>
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="form-group">
+            <label class="form-label" for="email">Adresse e-mail</label>
+            <div class="input-wrapper">
+                <i class="bi bi-envelope-fill input-icon"></i>
+                <input type="email" id="email" name="email" class="form-control"
+                       value="{{ old('email') }}" required autofocus autocomplete="username">
+            </div>
+            @error('email')
+                <div class="error-message" style="margin-top:10px;">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>{{ $message }}</span>
+                </div>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn-login">
+            <i class="bi bi-send-fill"></i>
+            Envoyer le lien
+        </button>
     </form>
-</x-guest-layout>
+@endsection

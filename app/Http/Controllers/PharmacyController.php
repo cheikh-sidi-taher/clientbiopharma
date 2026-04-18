@@ -17,9 +17,9 @@ class PharmacyController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('owner_name', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%")
-                  ->orWhere('address', 'like', "%$search%");
+                    ->orWhere('owner_name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhere('address', 'like', "%$search%");
             });
         }
 
@@ -42,79 +42,82 @@ class PharmacyController extends Controller
     public function create()
     {
         $zones = Zone::where('status', 'active')->orderBy('name')->get();
+
         return view('pharmacies.create', compact('zones'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'zone_id'              => 'required|exists:zones,id',
-            'name'                 => 'required|string|max:150',
-            'owner_name'           => 'nullable|string|max:100',
-            'phone'                => 'nullable|string|max:20',
-            'address'              => 'nullable|string|max:255',
-            'type'                 => 'required|in:publique,privée,clinique',
-            'best_selling_products'=> 'nullable|string',
-            'stock_problem'        => 'boolean',
-            'delivery_problem'     => 'boolean',
-            'training_need'        => 'boolean',
-            'distribution_need'    => 'boolean',
-            'interest_status'      => 'required|in:non_visité,visité,intéressé,non_intéressé,client',
-            'partnership_type'     => 'required|in:aucun,distributeur,partenaire,client_direct',
-            'notes'                => 'nullable|string',
-            'latitude'             => 'nullable|numeric',
-            'longitude'            => 'nullable|numeric',
+            'zone_id' => 'required|exists:zones,id',
+            'name' => 'required|string|max:150',
+            'owner_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'type' => 'required|in:publique,privée,clinique',
+            'best_selling_products' => 'nullable|string',
+            'stock_problem' => 'boolean',
+            'delivery_problem' => 'boolean',
+            'training_need' => 'boolean',
+            'distribution_need' => 'boolean',
+            'interest_status' => 'required|in:non_visité,visité,intéressé,non_intéressé,client',
+            'partnership_type' => 'required|in:aucun,distributeur,partenaire,client_direct',
+            'notes' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['created_by'] = Auth::id();
-        $validated['stock_problem']        = $request->boolean('stock_problem');
-        $validated['delivery_problem']     = $request->boolean('delivery_problem');
-        $validated['training_need']        = $request->boolean('training_need');
-        $validated['distribution_need']    = $request->boolean('distribution_need');
+        $validated['stock_problem'] = $request->boolean('stock_problem');
+        $validated['delivery_problem'] = $request->boolean('delivery_problem');
+        $validated['training_need'] = $request->boolean('training_need');
+        $validated['distribution_need'] = $request->boolean('distribution_need');
 
         Pharmacy::create($validated);
 
         return redirect()->route('pharmacies.index')
-            ->with('success', 'Pharmacie "' . $validated['name'] . '" ajoutée avec succès.');
+            ->with('success', 'Pharmacie "'.$validated['name'].'" ajoutée avec succès.');
     }
 
     public function show(Pharmacy $pharmacy)
     {
         $pharmacy->load(['zone', 'creator', 'visits.agent', 'client.commercial']);
+
         return view('pharmacies.show', compact('pharmacy'));
     }
 
     public function edit(Pharmacy $pharmacy)
     {
         $zones = Zone::where('status', 'active')->orderBy('name')->get();
+
         return view('pharmacies.edit', compact('pharmacy', 'zones'));
     }
 
     public function update(Request $request, Pharmacy $pharmacy)
     {
         $validated = $request->validate([
-            'zone_id'              => 'required|exists:zones,id',
-            'name'                 => 'required|string|max:150',
-            'owner_name'           => 'nullable|string|max:100',
-            'phone'                => 'nullable|string|max:20',
-            'address'              => 'nullable|string|max:255',
-            'type'                 => 'required|in:publique,privée,clinique',
-            'best_selling_products'=> 'nullable|string',
-            'stock_problem'        => 'boolean',
-            'delivery_problem'     => 'boolean',
-            'training_need'        => 'boolean',
-            'distribution_need'    => 'boolean',
-            'interest_status'      => 'required|in:non_visité,visité,intéressé,non_intéressé,client',
-            'partnership_type'     => 'required|in:aucun,distributeur,partenaire,client_direct',
-            'notes'                => 'nullable|string',
-            'latitude'             => 'nullable|numeric',
-            'longitude'            => 'nullable|numeric',
+            'zone_id' => 'required|exists:zones,id',
+            'name' => 'required|string|max:150',
+            'owner_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+            'type' => 'required|in:publique,privée,clinique',
+            'best_selling_products' => 'nullable|string',
+            'stock_problem' => 'boolean',
+            'delivery_problem' => 'boolean',
+            'training_need' => 'boolean',
+            'distribution_need' => 'boolean',
+            'interest_status' => 'required|in:non_visité,visité,intéressé,non_intéressé,client',
+            'partnership_type' => 'required|in:aucun,distributeur,partenaire,client_direct',
+            'notes' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
-        $validated['stock_problem']        = $request->boolean('stock_problem');
-        $validated['delivery_problem']     = $request->boolean('delivery_problem');
-        $validated['training_need']        = $request->boolean('training_need');
-        $validated['distribution_need']    = $request->boolean('distribution_need');
+        $validated['stock_problem'] = $request->boolean('stock_problem');
+        $validated['delivery_problem'] = $request->boolean('delivery_problem');
+        $validated['training_need'] = $request->boolean('training_need');
+        $validated['distribution_need'] = $request->boolean('distribution_need');
 
         $pharmacy->update($validated);
 
@@ -125,6 +128,7 @@ class PharmacyController extends Controller
     public function destroy(Pharmacy $pharmacy)
     {
         $pharmacy->delete();
+
         return redirect()->route('pharmacies.index')
             ->with('success', 'Pharmacie supprimée.');
     }

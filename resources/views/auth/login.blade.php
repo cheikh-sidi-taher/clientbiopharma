@@ -294,6 +294,13 @@
             </div>
         @endif
 
+        @if (session('status'))
+            <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:12px 14px;font-size:13px;color:#047857;margin-bottom:20px;display:flex;align-items:flex-start;gap:8px;">
+                <i class="bi bi-check-circle-fill" style="flex-shrink:0;margin-top:2px;"></i>
+                <span>{{ session('status') }}</span>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('login') }}">
             @csrf
 

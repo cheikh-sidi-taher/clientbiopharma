@@ -8,8 +8,26 @@
     <div>
         <h2 style="font-size:20px;font-weight:800;color:var(--text-primary);">Clients</h2>
         <p style="font-size:13px;color:var(--text-secondary);margin-top:2px;">
-            {{ $clients->total() }} client(s) converti(s)
+            {{ $clients->total() }} client(s)
         </p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        @can('export clients')
+            <a href="{{ route('clients.export', array_merge(request()->query(), ['format' => 'csv'])) }}" class="btn btn-outline" style="padding:9px 14px;">
+                <i class="bi bi-file-earmark-spreadsheet"></i> CSV
+            </a>
+            <a href="{{ route('clients.export', array_merge(request()->query(), ['format' => 'excel'])) }}" class="btn btn-outline" style="padding:9px 14px;">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </a>
+            <a href="{{ route('clients.export', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="btn btn-outline" style="padding:9px 14px;">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </a>
+        @endcan
+        @can('manage clients')
+            <a href="{{ route('clients.create') }}" class="btn btn-primary" style="padding:9px 16px;">
+                <i class="bi bi-person-plus-fill"></i> Nouveau client
+            </a>
+        @endcan
     </div>
 </div>
 
@@ -29,19 +47,37 @@
                 <div style="position:relative;">
                     <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
                     <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Pharmacie, zone, commercial..."
+                           placeholder="Pharmacie, adresse, conditions, commercial…"
                            style="width:100%;padding:9px 12px 9px 36px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;"
                            onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e2e8f0'">
                 </div>
             </div>
 
-            <div style="flex:1;min-width:150px;">
+            <div style="flex:1;min-width:130px;">
                 <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Zone</label>
-                <select name="zone_id" style="width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none;cursor:pointer;"
-                        onchange="this.form.submit()">
-                    <option value="">Toutes les zones</option>
+                <select name="zone_id" style="width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none;cursor:pointer;">
+                    <option value="">Toutes</option>
                     @foreach($zones as $zone)
                         <option value="{{ $zone->id }}" {{ request('zone_id') == $zone->id ? 'selected' : '' }}>{{ $zone->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="flex:1;min-width:120px;">
+                <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Statut</label>
+                <select name="status" style="width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none;cursor:pointer;">
+                    <option value="">Tous</option>
+                    <option value="actif" {{ request('status') === 'actif' ? 'selected' : '' }}>Actif</option>
+                    <option value="inactif" {{ request('status') === 'inactif' ? 'selected' : '' }}>Inactif</option>
+                </select>
+            </div>
+
+            <div style="flex:1;min-width:160px;">
+                <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Commercial</label>
+                <select name="commercial_id" style="width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none;cursor:pointer;">
+                    <option value="">Tous</option>
+                    @foreach($commercials as $co)
+                        <option value="{{ $co->id }}" {{ (string) request('commercial_id') === (string) $co->id ? 'selected' : '' }}>{{ $co->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -50,8 +86,8 @@
                 <button type="submit" class="btn btn-primary" style="padding:9px 16px;">
                     <i class="bi bi-search"></i>
                 </button>
-                @if(request()->hasAny(['search','zone_id']))
-                    <a href="{{ route('clients.index') }}" class="btn btn-outline" style="padding:9px 16px;">
+                @if(request()->hasAny(['search','zone_id','status','commercial_id']))
+                    <a href="{{ route('clients.index') }}" class="btn btn-outline" style="padding:9px 16px;" title="Réinitialiser">
                         <i class="bi bi-x"></i>
                     </a>
                 @endif
@@ -70,6 +106,7 @@
                     <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Zone</th>
                     <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Commercial</th>
                     <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Limite crédit</th>
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Statut</th>
                     <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Conditions</th>
                     <th style="padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Actions</th>
                 </tr>
@@ -100,18 +137,37 @@
                         <td style="padding:14px 16px;font-size:13px;color:var(--text-primary);font-weight:800;">
                             {{ number_format((float) $client->credit_limit, 2, ',', ' ') }}
                         </td>
-                        <td style="padding:14px 16px;font-size:13px;color:var(--text-secondary);max-width:260px;">
-                            {{ $client->payment_terms ?? '—' }}
-                        </td>
                         <td style="padding:14px 16px;">
-                            <a href="{{ route('clients.show', $client) }}" title="Voir" style="color:var(--primary);font-size:18px;">
+                            @if($client->status === 'actif')
+                                <span style="padding:4px 10px;background:#ecfdf5;color:#047857;border-radius:20px;font-size:11px;font-weight:700;">Actif</span>
+                            @else
+                                <span style="padding:4px 10px;background:#fef2f2;color:#b91c1c;border-radius:20px;font-size:11px;font-weight:700;">Inactif</span>
+                            @endif
+                        </td>
+                        <td style="padding:14px 16px;font-size:13px;color:var(--text-secondary);max-width:220px;">
+                            {{ Str::limit($client->payment_terms ?? '—', 80) }}
+                        </td>
+                        <td style="padding:14px 16px;white-space:nowrap;">
+                            <a href="{{ route('clients.show', $client) }}" title="Voir" style="color:var(--primary);font-size:18px;margin-right:8px;">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            @can('manage clients')
+                                <a href="{{ route('clients.edit', $client) }}" title="Modifier" style="color:var(--text-secondary);font-size:18px;margin-right:8px;">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ route('clients.destroy', $client) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce client ? La pharmacie redeviendra disponible pour une conversion.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Supprimer" style="background:none;border:none;padding:0;color:#dc2626;font-size:18px;cursor:pointer;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            @endcan
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="padding:48px;text-align:center;color:var(--text-muted);">
+                        <td colspan="8" style="padding:48px;text-align:center;color:var(--text-muted);">
                             <i class="bi bi-people" style="font-size:40px;display:block;margin-bottom:12px;"></i>
                             <p style="font-size:15px;font-weight:600;">Aucun client converti</p>
                         </td>

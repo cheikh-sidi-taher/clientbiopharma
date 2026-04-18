@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientExportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\PharmacyExportController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZoneController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,8 +26,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // Authenticated routes
 Route::middleware('auth')->group(function () {
 
-    // Profil (tous les utilisateurs authentifiés)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/parametres', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/parametres/entreprise', [SettingsController::class, 'updateApplication'])
+        ->middleware('role:Admin')
+        ->name('settings.application.update');
+
+    Route::redirect('/profile', '/parametres')->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
@@ -89,7 +96,25 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['permission:view clients|manage clients'])->group(function () {
         Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
-        Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    });
+
+    Route::middleware(['permission:export clients'])->group(function () {
+        Route::get('/clients/export/{format}', [ClientExportController::class, 'export'])
+            ->whereIn('format', ['csv', 'excel', 'pdf'])
+            ->name('clients.export');
+    });
+
+    Route::middleware(['permission:manage clients'])->group(function () {
+        Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+        Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+        Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit')->whereNumber('client');
+        Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update')->whereNumber('client');
+        Route::patch('/clients/{client}', [ClientController::class, 'update'])->whereNumber('client');
+        Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy')->whereNumber('client');
+    });
+
+    Route::middleware(['permission:view clients|manage clients'])->group(function () {
+        Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show')->whereNumber('client');
     });
 
     Route::middleware(['permission:view reports|export reports'])->group(function () {
@@ -99,6 +124,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export/{format}', [ReportController::class, 'export'])
             ->whereIn('format', ['csv', 'excel', 'pdf'])
             ->name('reports.export');
+    });
+
+    Route::middleware(['permission:view users|manage users'])->group(function () {
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+    });
+
+    Route::middleware(['permission:manage users'])->group(function () {
+        Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('users', [UserController::class, 'store'])->name('users.store');
+        Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::patch('users/{user}', [UserController::class, 'update']);
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 });
 

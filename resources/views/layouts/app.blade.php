@@ -515,16 +515,25 @@
         </div>
         @endcanany
 
-        @if(auth()->user()?->hasRole('Admin'))
+        @canany(['view users', 'manage users'])
         <div class="nav-section-label">Administration</div>
         <div class="nav-item">
-            <a href="{{ route('profile.edit') }}"
-               class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+            <a href="{{ route('users.index') }}"
+               class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i>
+                <span>Utilisateurs</span>
+            </a>
+        </div>
+        @endcanany
+
+        <div class="nav-section-label">Compte</div>
+        <div class="nav-item">
+            <a href="{{ route('settings.index') }}"
+               class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                 <i class="bi bi-gear-fill"></i>
                 <span>Paramètres</span>
             </a>
         </div>
-        @endif
     </nav>
 
     <div class="sidebar-footer">
@@ -561,8 +570,8 @@
                 {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 1)) }}
             </div>
             <div class="dropdown-menu" id="profileDropdown">
-                <a href="{{ route('profile.edit') }}" class="dropdown-item">
-                    <i class="bi bi-person-circle"></i> Mon Profil
+                <a href="{{ route('settings.index') }}" class="dropdown-item">
+                    <i class="bi bi-person-circle"></i> Paramètres
                 </a>
                 <div class="dropdown-divider"></div>
                 <form method="POST" action="{{ route('logout') }}">
@@ -582,6 +591,12 @@
         @if(session('success'))
             <div class="alert alert-success mb-4">
                 <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger mb-4" style="background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 16px;border-radius:8px;font-size:14px;">
+                <i class="bi bi-exclamation-circle-fill"></i> {{ session('error') }}
             </div>
         @endif
 

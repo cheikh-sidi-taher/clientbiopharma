@@ -13,6 +13,21 @@
     </style>
 </head>
 <body>
+    @php
+        $coName = \App\Models\Setting::get('company_name', config('app.name'));
+        $coAddr = \App\Models\Setting::get('company_address');
+        $coPhone = \App\Models\Setting::get('company_phone');
+        $coEmail = \App\Models\Setting::get('company_email');
+    @endphp
+    <div style="margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #1a6fbf;">
+        <div style="font-size:14px;font-weight:800;color:#0d1b2a;">{{ $coName }}</div>
+        @if($coAddr)<div style="font-size:9px;color:#4b5563;margin-top:2px;">{{ $coAddr }}</div>@endif
+        <div style="font-size:9px;color:#4b5563;margin-top:2px;">
+            @if($coPhone)<span>{{ $coPhone }}</span>@endif
+            @if($coPhone && $coEmail) &nbsp;|&nbsp; @endif
+            @if($coEmail)<span>{{ $coEmail }}</span>@endif
+        </div>
+    </div>
     <h2>{{ $label }}</h2>
     <p style="margin:0 0 14px 0;color:#6b7280;">
         Période : {{ $start->format('d/m/Y') }} - {{ $end->format('d/m/Y') }}

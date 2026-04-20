@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Pharmacy;
 use App\Models\Zone;
+use App\Services\PharmacyXlsxImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class PharmacyController extends Controller
 {
@@ -131,5 +133,59 @@ class PharmacyController extends Controller
 
         return redirect()->route('pharmacies.index')
             ->with('success', 'Pharmacie supprimée.');
+    }
+
+    public function destroyAll()
+    {
+        $deleted = Pharmacy::query()->count();
+        Pharmacy::query()->delete();
+
+        return redirect()->route('pharmacies.index')
+            ->with('success', "{$deleted} pharmacie(s) supprimée(s).");
+    }
+
+    public function destroySelected(Request $request)
+    {
+        $validated = $request->validate([
+            'pharmacy_ids' => 'required|array|min:1',
+            'pharmacy_ids.*' => 'integer|exists:pharmacies,id',
+        ], [
+            'pharmacy_ids.required' => 'Veuillez sélectionner au moins une pharmacie.',
+            'pharmacy_ids.min' => 'Veuillez sélectionner au moins une pharmacie.',
+        ]);
+
+        $deleted = Pharmacy::query()
+            ->whereIn('id', $validated['pharmacy_ids'])
+            ->delete();
+
+        return redirect()->route('pharmacies.index')
+            ->with('success', "{$deleted} pharmacie(s) sélectionnée(s) supprimée(s).");
+    }
+
+    public function import(Request $request, PharmacyXlsxImportService $importService)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:5120',
+        ], [
+            'file.required' => 'Veuillez sélectionner un fichier Excel (.xlsx).',
+            'file.mimes' => 'Le fichier doit être au format .xlsx.',
+            'file.max' => 'Le fichier ne doit pas dépasser 5 Mo.',
+        ]);
+
+        try {
+            $result = $importService->import($validated['file']);
+        } catch (RuntimeException $exception) {
+            return redirect()->route('pharmacies.index')
+                ->with('error', $exception->getMessage());
+        }
+
+        $message = "Import terminé: {$result['created']} créée(s), {$result['updated']} mise(s) à jour, {$result['skipped']} ignorée(s).";
+        if (($result['zones_created'] ?? 0) > 0) {
+            $message .= " {$result['zones_created']} zone(s) créée(s) automatiquement.";
+        }
+
+        return redirect()->route('pharmacies.index')
+            ->with('success', $message)
+            ->with('import_errors', $result['errors']);
     }
 }

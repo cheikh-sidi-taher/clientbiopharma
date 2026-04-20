@@ -66,6 +66,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['permission:manage pharmacies'])->group(function () {
         Route::get('pharmacies/create', [PharmacyController::class, 'create'])->name('pharmacies.create');
         Route::post('pharmacies', [PharmacyController::class, 'store'])->name('pharmacies.store');
+        Route::post('pharmacies/import', [PharmacyController::class, 'import'])->name('pharmacies.import');
+        Route::delete('pharmacies/selected', [PharmacyController::class, 'destroySelected'])->name('pharmacies.destroy_selected');
+        Route::delete('pharmacies', [PharmacyController::class, 'destroyAll'])->name('pharmacies.destroy_all');
     });
     Route::middleware(['permission:view pharmacies|manage pharmacies'])->group(function () {
         Route::get('pharmacies/{pharmacy}', [PharmacyController::class, 'show'])->name('pharmacies.show');
